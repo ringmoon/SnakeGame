@@ -45,7 +45,8 @@ public class SnakeGame extends JFrame{
                 case "進入遊戲":
                     setSize(720, 600);
                     remove(mainMenuPanel);
-                    add(gameMenuPanel);                  
+                    add(gameMenuPanel);     
+                    gameMenuPanel.gameBgmPlayState(true);
                     break;
                 case "排行榜":
                     try {
@@ -74,6 +75,7 @@ public class SnakeGame extends JFrame{
                     setSize(480, 600);
                     remove(gameMenuPanel);
                     add(mainMenuPanel);
+                    gameMenuPanel.gameBgmPlayState(false);
                     break;
             }
         }

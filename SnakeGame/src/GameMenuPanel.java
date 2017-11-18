@@ -10,7 +10,6 @@ import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
@@ -21,6 +20,7 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import javafx.scene.media.AudioClip;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -50,6 +50,8 @@ public class GameMenuPanel extends JPanel {
     private Timer timer;
     private Direction direction;
     private Queue<Direction> directions;
+    private AudioClip bgmPlayer;
+    private AudioClip soundPlayer;
 
     public GameMenuPanel() {
         setLayout(null);
@@ -107,6 +109,13 @@ public class GameMenuPanel extends JPanel {
         //加入遊戲執行程序
         timer = new Timer();
         timer.schedule(new GameTask(), 0, 200);
+        //選擇背景音樂
+        String path = getClass().getResource("bgm.mp3").toString();
+        bgmPlayer = new AudioClip(path);
+        //選擇吃音效
+        path = getClass().getResource("eat.wav").toString();
+        soundPlayer=new AudioClip(path);
+
     }
 
     private class GameWindow extends JPanel {
@@ -147,25 +156,25 @@ public class GameMenuPanel extends JPanel {
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_UP:
-                    if (direction == Direction.DOWN||direction == Direction.UP) {
+                    if (direction == Direction.DOWN || direction == Direction.UP) {
                         return;   //不能180度轉彎,及跟現在前進方向一樣時return
                     }
                     directions.add(Direction.UP);
                     break;
                 case KeyEvent.VK_DOWN:
-                    if (direction == Direction.UP||direction == Direction.DOWN) {
+                    if (direction == Direction.UP || direction == Direction.DOWN) {
                         return;     //不能180度轉彎,及跟現在前進方向一樣時return
                     }
                     directions.add(Direction.DOWN);
                     break;
                 case KeyEvent.VK_LEFT:
-                    if (direction == Direction.RIGHT||direction == Direction.LEFT) {
+                    if (direction == Direction.RIGHT || direction == Direction.LEFT) {
                         return;  //不能180度轉彎,及跟現在前進方向一樣時return
                     }
                     directions.add(Direction.LEFT);
                     break;
                 case KeyEvent.VK_RIGHT:
-                    if (direction == Direction.LEFT||direction == Direction.RIGHT) {
+                    if (direction == Direction.LEFT || direction == Direction.RIGHT) {
                         return;   //不能180度轉彎,及跟現在前進方向一樣時return
                     }
                     directions.add(Direction.RIGHT);
@@ -307,6 +316,7 @@ public class GameMenuPanel extends JPanel {
                 break;
         }
         if (outOfBound) {
+            new AudioClip(getClass().getResource("fail.wav").toString()).play();
             JOptionPane.showMessageDialog(GameMenuPanel.this, "撞牆了!笨蛋!!", "超出邊界", JOptionPane.ERROR_MESSAGE);
             gameLeaderboardUpdate();
             restartGame.setSelected(true);
@@ -337,6 +347,7 @@ public class GameMenuPanel extends JPanel {
         for (int i = 0; i < snakeNodes.size() - 1; i++) {
             if (snakeNodes.get(i).isSame(new Point(snakeNodes.get(0).getPoint().x + transferX,
                     snakeNodes.get(0).getPoint().y + transferY))) {
+                new AudioClip(getClass().getResource("fail.wav").toString()).play();
                 JOptionPane.showMessageDialog(GameMenuPanel.this, "Game Over", "自撞事故", JOptionPane.ERROR_MESSAGE);
                 gameLeaderboardUpdate();
                 restartGame.setSelected(true);
@@ -360,6 +371,7 @@ public class GameMenuPanel extends JPanel {
                 nodeCount++;
                 score++;
                 scoreLabel.setText("Score : " + score);
+                soundPlayer.play();
                 return true;
             }
         }
@@ -418,26 +430,26 @@ public class GameMenuPanel extends JPanel {
                     return s2.compareTo(s1);
                 }
             });
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(getClass().getResource("leaderboard.txt").getPath()),"utf-8"));
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(getClass().getResource("leaderboard.txt").getPath()), "utf-8"));
             if (bw != null) {
-                for(int i=0;i<index;i++){
-                    if(i==0){
+                for (int i = 0; i < index; i++) {
+                    if (i == 0) {
                         scores[i].setRank("第一名");
-                    }else if(i==1){
+                    } else if (i == 1) {
                         scores[i].setRank("第二名");
-                    }else if(i==2){
+                    } else if (i == 2) {
                         scores[i].setRank("第三名");
-                    }else if(i==3){
+                    } else if (i == 3) {
                         scores[i].setRank("第四名");
-                    }else if(i==4){
+                    } else if (i == 4) {
                         scores[i].setRank("第五名");
                     }
-                    bw.write(scores[i].getRank()+"\t");
-                    bw.write(scores[i].getName()+"\t");
+                    bw.write(scores[i].getRank() + "\t");
+                    bw.write(scores[i].getName() + "\t");
                     bw.write(String.valueOf(scores[i].getScore()));
                     bw.newLine();
                     bw.flush();
-                }               
+                }
             }
             br.close();
             bw.close();
@@ -445,5 +457,13 @@ public class GameMenuPanel extends JPanel {
             exception.printStackTrace();
         }
 
+    }
+
+    public void gameBgmPlayState(boolean play) {
+        if (play) {
+            bgmPlayer.play(0.2f);
+        } else {
+            bgmPlayer.stop();
+        }
     }
 }
