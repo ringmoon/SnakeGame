@@ -45,7 +45,7 @@ public class SnakeGame extends JFrame{
                 case "進入遊戲":
                     setSize(720, 600);
                     remove(mainMenuPanel);
-                    add(gameMenuPanel);     
+                    add(gameMenuPanel);
                     gameMenuPanel.gameBgmPlayState(true);
                     break;
                 case "排行榜":

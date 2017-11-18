@@ -115,7 +115,6 @@ public class GameMenuPanel extends JPanel {
         //選擇吃音效
         path = getClass().getResource("eat.wav").toString();
         soundPlayer=new AudioClip(path);
-
     }
 
     private class GameWindow extends JPanel {
@@ -243,9 +242,11 @@ public class GameMenuPanel extends JPanel {
                     reset();
                     break;
                 case "暫停遊戲":
+                    if(!startGame.isSelected()) return;
                     gameIsRunning = false;
                     break;
                 case "繼續遊戲":
+                    if(!startGame.isSelected()) return;
                     requestFocus();//讓JFrame獲得焦點
                     gameIsRunning = true;
                     break;
