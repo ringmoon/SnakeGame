@@ -114,7 +114,7 @@ public class GameMenuPanel extends JPanel {
         bgmPlayer = new AudioClip(path);
         //選擇吃音效
         path = getClass().getResource("eat.wav").toString();
-        soundPlayer=new AudioClip(path);
+        soundPlayer = new AudioClip(path);
     }
 
     private class GameWindow extends JPanel {
@@ -155,26 +155,26 @@ public class GameMenuPanel extends JPanel {
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_UP:
-                    if (direction == Direction.DOWN || direction == Direction.UP) {
-                        return;   //不能180度轉彎,及跟現在前進方向一樣時return
+                    if (direction == Direction.DOWN) {
+                        return;   //不能180度轉彎
                     }
                     directions.add(Direction.UP);
                     break;
                 case KeyEvent.VK_DOWN:
-                    if (direction == Direction.UP || direction == Direction.DOWN) {
-                        return;     //不能180度轉彎,及跟現在前進方向一樣時return
+                    if (direction == Direction.UP) {
+                        return;     //不能180度轉彎
                     }
                     directions.add(Direction.DOWN);
                     break;
                 case KeyEvent.VK_LEFT:
-                    if (direction == Direction.RIGHT || direction == Direction.LEFT) {
-                        return;  //不能180度轉彎,及跟現在前進方向一樣時return
+                    if (direction == Direction.RIGHT) {
+                        return;  //不能180度轉彎
                     }
                     directions.add(Direction.LEFT);
                     break;
                 case KeyEvent.VK_RIGHT:
-                    if (direction == Direction.LEFT || direction == Direction.RIGHT) {
-                        return;   //不能180度轉彎,及跟現在前進方向一樣時return
+                    if (direction == Direction.LEFT ) {
+                        return;   //不能180度轉彎
                     }
                     directions.add(Direction.RIGHT);
                     break;
@@ -242,11 +242,15 @@ public class GameMenuPanel extends JPanel {
                     reset();
                     break;
                 case "暫停遊戲":
-                    if(!startGame.isSelected()) return;
+                    if (!startGame.isSelected()) {
+                        return;
+                    }
                     gameIsRunning = false;
                     break;
                 case "繼續遊戲":
-                    if(!startGame.isSelected()) return;
+                    if (!startGame.isSelected()) {
+                        return;
+                    }
                     requestFocus();//讓JFrame獲得焦點
                     gameIsRunning = true;
                     break;
@@ -259,34 +263,46 @@ public class GameMenuPanel extends JPanel {
     //生成食物
     public void generateFoods(int count) {
         Random random = new Random();
+        boolean isRepeatedFood;
         if (nodeCount < 295) {
             for (int c = 0; c < count; c++) {
+                isRepeatedFood=false;
                 Point point = new Point(offset + random.nextInt(15) * size, offset + random.nextInt(20) * size);
+                //判斷是否和先前食物重複,重複就重新生成
+                for(int f=0;f<foods.size();f++){
+                    if(foods.get(f).isSame(point)){
+                        c-=1;
+                        isRepeatedFood=true;
+                    }
+                }
+                if(isRepeatedFood) continue;
                 for (int i = 0; i < snakeNodes.size(); i++) {
                     if (snakeNodes.get(i).isSame(point)) {
-                        point = new Point(offset + random.nextInt(15) * size, offset + random.nextInt(20) * size);
-                        i = -1;
-                    }
-                    if (i == snakeNodes.size()) {
+                        c -= 1;
+                        point = null;
                         break;
                     }
                 }
-                foods.add(new SnakeNode(point, size));
+                if (point != null) {
+                    foods.add(new SnakeNode(point, size));
+                }
             }
 
         } else {
             if (foods.size() == 0) {
-                Point point = new Point(offset + (random.nextInt(15) + 1) * size, offset + (random.nextInt(20) + 1) * size);
-                for (int i = 0; i < snakeNodes.size(); i++) {
-                    if (snakeNodes.get(i).isSame(point)) {
-                        point = new Point(offset + (random.nextInt(15) + 1) * size, offset + (random.nextInt(20) + 1) * size);
-                        i = -1;
+                for (int c = 0; c < count; c++) {
+                    Point point = new Point(offset + random.nextInt(15) * size, offset + random.nextInt(20) * size);
+                    for (int i = 0; i < snakeNodes.size(); i++) {
+                        if (snakeNodes.get(i).isSame(point)) {
+                            c -= 1;
+                            point = null;
+                            break;
+                        }
                     }
-                    if (i == snakeNodes.size()) {
-                        break;
+                    if (point != null) {
+                        foods.add(new SnakeNode(point, size));
                     }
                 }
-                foods.add(new SnakeNode(point, size));
             }
         }
     }
@@ -398,6 +414,15 @@ public class GameMenuPanel extends JPanel {
 
     //設定現在前進方向
     public void setCurrentDirection() {
+        //沒有設定方向的情況下,直接取用方向
+        if(direction==null){
+            direction=directions.poll();
+        }
+        //將和當前方向相同的方向刪除
+        while(direction==directions.peek()){
+            directions.poll();
+        }
+        //確定下個方向不是null就取用
         if (directions.peek() != null) {
             direction = directions.poll();
         }

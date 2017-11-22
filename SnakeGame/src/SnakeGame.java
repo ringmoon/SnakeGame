@@ -56,9 +56,9 @@ public class SnakeGame extends JFrame{
                         while ((line = br.readLine()) != null) {
                             String scores[] = line.split("\t");
                             message.append(scores[0]);
-                            message.append("               ");
+                            message.append(",");
                             message.append(scores[1]);
-                            message.append("               ");
+                            message.append(",");
                             message.append(scores[2] + "分");
                             message.append("\n");
                         }
